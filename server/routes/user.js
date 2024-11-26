@@ -53,4 +53,19 @@ router.get("/get/petitioner/:id", verifyToken, async (req, res) => {
   }
 });
 
+// ROUTE 3: CHECK IF THE BIO ID EXISTS FOR PETITIONER WHILE SIGNING UP/IN A Global API
+router.get("/check/bioId/:bioId", async (req, res) => {
+  try {
+    const bioId = req.params.bioId;
+    const petitioner = await User.findOne({ bioId });
+    if (petitioner) {
+      res.json({ message: "Bio Id exists", status: true });
+    } else {
+      res.json({ message: "Bio Id does not exist", status: false });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
