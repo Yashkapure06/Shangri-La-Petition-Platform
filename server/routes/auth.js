@@ -93,6 +93,7 @@ router.post(
     body("email", "Enter a valid email")
       .isEmail()
       .isLength({ min: 6, max: 255 }),
+    body("dob", "Date of Birth is required").exists(),
     body("password", "Password is required").exists().isLength({ min: 6 }),
     body("bioId", "BioId is required").exists().isLength({ min: 10, max: 10 }),
     body("role", "Role is required").exists().isIn(["petitioner"]),
@@ -104,7 +105,7 @@ router.post(
     }
 
     try {
-      const { username, email, password, bioId, role } = req.body;
+      const { username, email, password, bioId, role, dob } = req.body;
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -121,6 +122,7 @@ router.post(
         password,
         bioId,
         role,
+        dob,
       });
       const salt = await bcrypt.genSalt(10);
       newUser.password = await bcrypt.hash(password, salt);
