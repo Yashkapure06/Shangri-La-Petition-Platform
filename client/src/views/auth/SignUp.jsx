@@ -4,17 +4,26 @@ import { BsQrCode } from "react-icons/bs";
 import QrScanner from "qr-scanner";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { BASE_URL } from "../../config";
 
 export default function SignUp() {
   const [scanResultWebCam, setScanResultWebCam] = useState("");
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const videoRef = useRef(null);
+  const [credentials, setCredentials] = useState({
+    username: "",
+    email: "",
+    dateOfBirth: "",
+    bioId: "",
+    password: "",
+  });
 
   useEffect(() => {
     let scanner = null;
 
     if (isQrPopupOpen && videoRef.current) {
-      scanner = new QrScanner(videoRef.current, (result) => {
+      scanner = new QrScanner(videoRef.current, async (result) => {
         setScanResultWebCam(result);
         setIsQrPopupOpen(false);
         const bioIdInput = document.getElementById("bioId");
@@ -24,7 +33,11 @@ export default function SignUp() {
           toast.error("Invalid Bio Id");
           bioIdInput.value = "";
         }
-        toast.success("Bio Id Accepted Successfully");
+        // toast.success("Bio Id Accepted Successfully");
+        const bioIdExists = await checkIsBioIdExists(result);
+        if (bioIdExists === false) {
+          bioIdInput.value = "";
+        }
       });
       scanner.start();
     }
@@ -44,6 +57,50 @@ export default function SignUp() {
     setIsQrPopupOpen(false);
   };
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setCredentials({ ...credentials, [id]: value });
+  };
+
+  const checkIsBioIdExists = async (bioId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/check/bioId/${bioId}`);
+      console.log(response.data);
+      if (response.data.status === true) {
+        toast.error("Bio Id already exists");
+        setScanResultWebCam("");
+      } else {
+        toast.success("Bio Id Accepted Successfully");
+      }
+      // return response.data;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+
+  const handlePetitionerSignUp = async () => {
+    try {
+      const body = {
+        username: credentials.username,
+        email: credentials.email,
+        dob: credentials.dateOfBirth,
+        bioId: scanResultWebCam,
+        password: credentials.password,
+        role: "petitioner",
+      };
+      console.log(body);
+      const response = await axios.post(
+        `${BASE_URL}/auth/petitioner/register`,
+        body
+      );
+      console.log(response.data);
+      toast.success("Sign Up successful!");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="mt-16 mb-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center">
       <div className="mt-[1.2vh] w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]">
@@ -60,6 +117,8 @@ export default function SignUp() {
           placeholder="Jack"
           id="username"
           type="text"
+          value={credentials.username}
+          handleChange={handleInputChange}
         />
         <InputField
           variant="auth"
@@ -68,6 +127,8 @@ export default function SignUp() {
           placeholder="mail@jack.com"
           id="email"
           type="text"
+          value={credentials.email}
+          handleChange={handleInputChange}
         />
         <InputField
           variant="auth"
@@ -76,6 +137,8 @@ export default function SignUp() {
           placeholder="DD/MM/YYYY"
           id="dateOfBirth"
           type="date"
+          value={credentials.dateOfBirth}
+          handleChange={handleInputChange}
         />
         <div className="flex items-center justify-between w-full mb-3">
           <InputField
@@ -86,7 +149,7 @@ export default function SignUp() {
             id="bioId"
             type="text"
             value={scanResultWebCam}
-            readOnly
+            handleChange={handleInputChange}
           />
           <button
             onClick={handleOpenQrPopup}
@@ -104,9 +167,14 @@ export default function SignUp() {
           placeholder="Min. 8 characters"
           id="password"
           type="password"
+          value={credentials.password}
+          handleChange={handleInputChange}
         />
 
-        <button className="linear mt-2 w-full rounded-xl bg-brand-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200">
+        <button
+          onClick={handlePetitionerSignUp}
+          className="linear mt-2 w-full rounded-xl bg-brand-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200"
+        >
           Sign Up
         </button>
         <div className="mt-4">

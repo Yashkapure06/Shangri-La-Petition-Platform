@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import InputField from "../../components/fields/InputField";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BsQrCode } from "react-icons/bs";
 import QrScanner from "qr-scanner";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { BASE_URL } from "../../config";
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const [scanResult, setScanResult] = useState("");
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
+
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
+    role: "",
+  });
+
   const videoRef = useRef(null);
 
   const adminUrl = window.location.href.includes("admin");
@@ -16,10 +26,12 @@ export default function SignIn() {
     let scanner = null;
 
     if (isQrPopupOpen && videoRef.current) {
-      scanner = new QrScanner(videoRef.current, (result) => {
-        toast.success(`Scanned successfully: ${result}`);
+      scanner = new QrScanner(videoRef.current, async (result) => {
+        // toast.success(`Scanned successfully: ${result}`);
         setScanResult(result);
         // TODO: Call an API for logging in using QR code
+        await handlePetitionSignInWithQr(result);
+
         setIsQrPopupOpen(false);
       });
       scanner.start();
@@ -39,8 +51,85 @@ export default function SignIn() {
   const handleCloseQrPopup = () => {
     setIsQrPopupOpen(false);
   };
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setCredentials({ ...credentials, [id]: value });
+  };
 
-  const handleAdminSignIn = () => {};
+  const handleAdminSignIn = async () => {
+    try {
+      const body = {
+        ...credentials,
+        role: "admin",
+      };
+      const response = await axios.post(`${BASE_URL}/auth/admin/login`, body);
+      toast.success("Login successful!");
+      localStorage.setItem("authToken", response.data.authToken);
+      localStorage.setItem("role", response.data.role);
+
+      navigate("/admin/");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed!");
+      console.error(error);
+    }
+  };
+
+  const handlePetitionerSignIn = async () => {
+    try {
+      const body = {
+        email: credentials.email,
+        password: credentials.password,
+      };
+      const response = await axios.post(
+        `${BASE_URL}/auth/petitioner/login`,
+        body
+      );
+      console.log(response.data);
+      toast.success("Login successful!");
+      localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("role", "petitioner");
+
+      navigate("/petitioner");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed!");
+      console.error(error);
+    }
+  };
+
+  const handlePetitionSignInWithQr = async (bioId) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/petitioner/login`, {
+        bioId,
+      });
+      console.log(response.data);
+      toast.success("Login successful!");
+
+      localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("role", "petitioner");
+
+      navigate("/petitioner");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed!");
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const checkIsAuthenticated = () => {
+      const token = localStorage.getItem("authToken");
+      const role = localStorage.getItem("role");
+
+      if (token) {
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (role === "petitioner") {
+          navigate("/petitioner/dashboard");
+        }
+      }
+    };
+
+    checkIsAuthenticated();
+  }, [navigate]);
 
   return (
     <div className="mt-16 mb-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center">
@@ -60,8 +149,8 @@ export default function SignIn() {
           placeholder="mail@simmmple.com"
           id="email"
           type="text"
-          value={scanResult}
-          readOnly
+          value={credentials.email}
+          handleChange={handleInputChange}
         />
 
         <InputField
@@ -70,7 +159,9 @@ export default function SignIn() {
           label="Password*"
           placeholder="Min. 8 characters"
           id="password"
+          value={credentials.password}
           type="password"
+          handleChange={handleInputChange}
         />
         {!adminUrl && (
           <>
@@ -92,7 +183,10 @@ export default function SignIn() {
           </>
         )}
 
-        <button className="linear mt-2 w-full rounded-xl bg-brand-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200">
+        <button
+          onClick={adminUrl ? handleAdminSignIn : handlePetitionerSignIn}
+          className="linear mt-2 w-full rounded-xl bg-brand-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200"
+        >
           Sign In
         </button>
         {!adminUrl && (

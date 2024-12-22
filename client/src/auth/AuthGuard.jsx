@@ -1,19 +1,17 @@
-import { Navigate, useLocation } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
-const AuthGuard = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  const { pathname } = useLocation();
+const AuthGuard = ({ children, role }) => {
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("authToken");
+    const userRole = localStorage.getItem("role");
+    return token && userRole === role;
+  };
 
-  return (
-    <>
-      {isAuthenticated ? (
-        children
-      ) : (
-        <Navigate replace to="/auth/login" state={{ from: pathname }} />
-      )}
-    </>
-  );
+  if (!isAuthenticated()) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export default AuthGuard;

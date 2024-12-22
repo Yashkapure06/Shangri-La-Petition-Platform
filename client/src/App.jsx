@@ -5,16 +5,28 @@ import AdminLayout from "./layouts/admin";
 import AuthLayout from "./layouts/auth";
 import PetitionerLayout from "./layouts/petitioner";
 import Landing from "./views/landing/Landing";
+import AuthGuard from "./auth/AuthGuard";
 const App = () => {
   return (
     <Routes>
       <Route path="auth/petitioner/*" element={<AuthLayout />} />
       <Route path="auth/admin/*" element={<AuthLayout />} />
 
-      <Route path="admin/*" element={<AdminLayout isAdmin={true} />} />
+      <Route
+        path="admin/*"
+        element={
+          <AuthGuard role="admin">
+            <AdminLayout isAdmin={true} />
+          </AuthGuard>
+        }
+      />
       <Route
         path="petitioner/*"
-        element={<PetitionerLayout isAdmin={false} />}
+        element={
+          <AuthGuard role="petitioner">
+            <PetitionerLayout isAdmin={false} />
+          </AuthGuard>
+        }
       />
 
       <Route path="/" element={<Landing />} />

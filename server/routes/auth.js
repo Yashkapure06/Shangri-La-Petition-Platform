@@ -69,7 +69,7 @@ router.post(
             },
           };
           const authToken = jwt.sign(payload, JWT_SECRET);
-          return res.status(200).json({ authToken });
+          return res.status(200).json({ authToken, role: "admin" });
         } else {
           return res.status(400).json({ error: "Invalid Credentials" });
         }

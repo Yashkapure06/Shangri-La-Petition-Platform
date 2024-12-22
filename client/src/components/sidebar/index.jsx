@@ -5,11 +5,26 @@ import Links from "./components/Links";
 
 import SidebarCard from "../../components/sidebar/componentsrtl/SidebarCard";
 import routes from "../../routes";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Sidebar = ({ open, onClose, isAdmin }) => {
+  const navigate = useNavigate();
   const routesFiltered = isAdmin.isAdmin
     ? routes.filter((route) => route.layout === "/admin")
     : routes.filter((route) => route.layout === "/petitioner");
+
+  const handleLogout = () => {
+    const token = localStorage.getItem("authToken");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("role");
+      toast.success(`${role} logged out successfully!`);
+      navigate("/");
+    }
+  };
 
   return (
     <div
@@ -38,7 +53,7 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
 
       {/* Free Horizon Card */}
       <div className="flex justify-center">
-        <SidebarCard />
+        <SidebarCard handleLogout={handleLogout} />
       </div>
 
       {/* Nav item end */}
