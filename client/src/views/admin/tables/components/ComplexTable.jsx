@@ -17,14 +17,15 @@ const columnHelper = createColumnHelper();
 // const columns = columnsDataCheck;
 export default function ComplexTable(props) {
   const { tableData, isAdmin } = props;
+  // console.log("tableData", tableData);
   const [sorting, setSorting] = React.useState([]);
   let defaultData = tableData;
   const columns = [
-    columnHelper.accessor("name", {
-      id: "name",
+    columnHelper.accessor("title", {
+      id: "title",
       header: () => (
         <p className="text-sm font-bold text-gray-600 dark:text-white">
-          PETITION NAME
+          Petition Title
         </p>
       ),
       cell: (info) => (
@@ -34,10 +35,12 @@ export default function ComplexTable(props) {
       ),
     }),
 
-    columnHelper.accessor("date", {
-      id: "date",
+    columnHelper.accessor("description", {
+      id: "description",
       header: () => (
-        <p className="text-sm font-bold text-gray-600 dark:text-white">DATE</p>
+        <p className="text-sm font-bold text-gray-600 dark:text-white">
+          Petition Description
+        </p>
       ),
       cell: (info) => (
         <p className="text-sm font-bold text-navy-700 dark:text-white">
@@ -46,11 +49,11 @@ export default function ComplexTable(props) {
       ),
     }),
 
-    columnHelper.accessor("status", {
+    columnHelper.accessor("signatures", {
       id: "signatures",
       header: () => (
         <p className="text-sm font-bold text-gray-600 dark:text-white">
-          SIGNATURES
+          Signatures
         </p>
       ),
       cell: (info) => (
@@ -64,7 +67,7 @@ export default function ComplexTable(props) {
       id: "progress",
       header: () => (
         <p className="text-sm font-bold text-gray-600 dark:text-white">
-          PROGRESS
+          Progress
         </p>
       ),
       cell: (info) => (
@@ -78,7 +81,7 @@ export default function ComplexTable(props) {
       id: "status",
       header: () => (
         <p className="text-sm font-bold text-gray-600 dark:text-white">
-          STATUS
+          Status
         </p>
       ),
       cell: (info) => (
@@ -96,7 +99,7 @@ export default function ComplexTable(props) {
             id: "actions",
             header: () => (
               <p className="text-sm font-bold text-gray-600 dark:text-white">
-                ACTIONS
+                Actions
               </p>
             ),
             cell: (info) => (
@@ -129,6 +132,7 @@ export default function ComplexTable(props) {
     getSortedRowModel: getSortedRowModel(),
     debugTable: true,
   });
+  // TODO: Check the flow of the data to be added in the table
   return (
     <Card extra={"w-full h-full px-6 pb-6 sm:overflow-x-auto"}>
       <div className="relative flex items-center justify-between pt-4">
@@ -167,28 +171,28 @@ export default function ComplexTable(props) {
             ))}
           </thead>
           <tbody>
-            {table
-              .getRowModel()
-              .rows.slice(0, 5)
-              .map((row) => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td
-                          key={cell.id}
-                          className="min-w-[150px] border-white/0 py-3  pr-4"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+            {table?.data?.map((row) => {
+              return (
+                <tr
+                  key={row.id}
+                  className="border-b-[1px] border-gray-200 dark:border-gray-600"
+                >
+                  {row.cells.map((cell) => {
+                    return (
+                      <td
+                        key={cell.id}
+                        className="pt-4 pb-4 pr-4 text-sm text-gray-800 dark:text-white"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

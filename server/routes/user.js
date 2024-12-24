@@ -47,7 +47,14 @@ router.get("/getall/petitioners", verifyToken, async (req, res) => {
 router.get("/get/petitioner/:id", verifyToken, async (req, res) => {
   try {
     const petitioner = await User.findById(req.params.id);
-    res.json(petitioner);
+    const petitionerData = {
+      bioId: petitioner.bioId,
+      email: petitioner.email,
+      username: petitioner.username,
+      dob: petitioner.dob,
+      id: petitioner._id,
+    };
+    res.json(petitionerData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -21,6 +21,7 @@ const Sidebar = ({ open, onClose, isAdmin }) => {
     if (token && role) {
       localStorage.removeItem("authToken");
       localStorage.removeItem("role");
+      localStorage.removeItem("userId");
       toast.success(`${role} logged out successfully!`);
       navigate("/");
     }

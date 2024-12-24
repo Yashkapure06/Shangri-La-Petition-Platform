@@ -88,6 +88,7 @@ export default function SignIn() {
       toast.success("Login successful!");
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("role", "petitioner");
+      localStorage.setItem("userId", response.data.petitioner._id);
 
       navigate("/petitioner");
     } catch (error) {
@@ -106,6 +107,7 @@ export default function SignIn() {
 
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("role", "petitioner");
+      localStorage.setItem("userId", response.data.petitioner._id);
 
       navigate("/petitioner");
     } catch (error) {

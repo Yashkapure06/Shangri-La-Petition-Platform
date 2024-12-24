@@ -22,24 +22,20 @@ export default function PetitionerLayout(props) {
 
   const getActiveRoute = (routes) => {
     let activeRoute = "Main Dashboard";
-    for (let i = 0; i < routes.length; i++) {
+    for (const route of routes) {
       if (
-        window.location.href.indexOf(
-          routes[i].layout + "/" + routes[i].path
-        ) !== -1
+        window.location.href.indexOf(route.layout + "/" + route.path) !== -1
       ) {
-        setCurrentRoute(routes[i].name);
+        setCurrentRoute(route.name);
       }
     }
     return activeRoute;
   };
   const getActiveNavbar = (routes) => {
     let activeNavbar = false;
-    for (let i = 0; i < routes.length; i++) {
-      if (
-        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
-      ) {
-        return routes[i].secondary;
+    for (const route of routes) {
+      if (window.location.href.indexOf(route.layout + route.path) !== -1) {
+        return route.secondary;
       }
     }
     return activeNavbar;
