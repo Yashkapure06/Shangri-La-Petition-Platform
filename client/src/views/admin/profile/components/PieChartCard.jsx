@@ -1,37 +1,60 @@
 import PieChart from "../../../../components/charts/PieChart";
-import { pieChartData, pieChartOptions } from "../../../../variables/charts";
 import Card from "../../../../components/card";
 
-const PieChartCard = (isAdmin) => {
+const PieChartCard = ({ isAdmin, petitions }) => {
+  // Filter petitions based on status and count open, and closed petitions
+  const filterPetitions = () => {
+    if (!petitions || petitions.length === 0) {
+      return [0, 0]; // Default to 0 if no petitions available
+    }
+
+    const openPetitions = petitions.filter(
+      (petition) => petition.status === "open"
+    );
+    const closedPetitions = petitions.filter(
+      (petition) => petition.status === "closed"
+    );
+    return [openPetitions.length, closedPetitions.length];
+  };
+
+  const [openCount, closedCount] = filterPetitions();
+  const pieChartData = [openCount, closedCount];
+  const pieChartOptions = {
+    labels: ["Open Petitions", "Closed Petitions"],
+
+    colors: ["#6AD2FF", "#FF6A6A"],
+    chart: {
+      type: "pie",
+    },
+    legend: {
+      position: "bottom",
+    },
+  };
+
   return (
     <Card extra="rounded-[20px] p-3">
       <div className="flex flex-row justify-between px-3 pt-2">
         <div>
           <h4 className="text-lg font-bold text-navy-700 dark:text-white">
-            Your Pie Chart
+            Petition Status
           </h4>
         </div>
-
-        <div className="mb-6 flex items-center justify-center">
-          <select className="mb-3 mr-2 flex items-center justify-center text-sm font-bold text-gray-600 hover:cursor-pointer dark:!bg-navy-800 dark:text-white">
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="weekly">Weekly</option>
-          </select>
-        </div>
       </div>
 
-      <div className="mb-auto flex h-[220px] w-full items-center justify-center">
+      <div className="mb-auto flex h-[350px] w-full items-center justify-center">
         <PieChart options={pieChartOptions} series={pieChartData} />
       </div>
+
       <div className="flex flex-row !justify-between rounded-2xl px-6 py-3 shadow-2xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
         <div className="flex flex-col items-center justify-center">
           <div className="flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-brand-500" />
-            <p className="ml-1 text-sm font-normal text-gray-600">Your Files</p>
+            <div className="h-2 w-2 rounded-full bg-[#6AD2FF]" />
+            <p className="ml-1 text-sm font-normal text-gray-600">
+              Open Petitions
+            </p>
           </div>
-          <p className="mt-px text-xl font-bold text-navy-700  dark:text-white">
-            63%
+          <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
+            {((openCount / (openCount + closedCount)) * 100).toFixed(1)}%
           </p>
         </div>
 
@@ -39,11 +62,13 @@ const PieChartCard = (isAdmin) => {
 
         <div className="flex flex-col items-center justify-center">
           <div className="flex items-center justify-center">
-            <div className="h-2 w-2 rounded-full bg-[#6AD2FF]" />
-            <p className="ml-1 text-sm font-normal text-gray-600">System</p>
+            <div className="h-2 w-2 rounded-full bg-[#FF6A6A]" />
+            <p className="ml-1 text-sm font-normal text-gray-600">
+              Closed Petitions
+            </p>
           </div>
           <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            25%
+            {((closedCount / (openCount + closedCount)) * 100).toFixed(1)}%
           </p>
         </div>
       </div>

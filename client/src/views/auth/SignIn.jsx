@@ -84,7 +84,6 @@ export default function SignIn() {
         `${BASE_URL}/auth/petitioner/login`,
         body
       );
-      console.log(response.data);
       toast.success("Login successful!");
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("role", "petitioner");

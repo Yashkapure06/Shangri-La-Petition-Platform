@@ -18,7 +18,7 @@ const Dashboard = ({ isAdmin }) => {
   const [state, setState] = useState({});
   const { title, description } = state;
   const [showModal, setShowModal] = useState(false);
-
+  const [threshold, setThreshold] = useState(0);
   const [userData, setUserData] = useState({});
   const [petitions, setPetitions] = useState([]);
 
@@ -37,21 +37,23 @@ const Dashboard = ({ isAdmin }) => {
     }
   };
 
-  const data = {
-    bioId: userData.bioId,
-    email: userData.email,
-    username: userData.username,
-    dob: userData.dob,
-    id: userData._id,
-  };
-
   useEffect(() => {
-    Promise.all([getUserDataById(), getAllPetitions()]);
+    if (isAdmin === false) {
+      Promise.all([getUserDataById()]);
+    }
+    getAllPetitions();
+    getGlobalThreshold();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setState({ ...state, [name]: value });
+    if (name === "threshold") {
+      if (value >= 0) {
+        setThreshold(value);
+      }
+    } else {
+      setState({ ...state, [name]: value });
+    }
   };
 
   const handlePetitionCreation = async () => {
@@ -66,7 +68,6 @@ const Dashboard = ({ isAdmin }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
       setState({});
       getAllPetitions();
       toast.success("Petition created successfully!");
@@ -88,6 +89,42 @@ const Dashboard = ({ isAdmin }) => {
       console.error(error);
     }
   };
+
+  const getGlobalThreshold = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/petition/get-global-threshold`
+      );
+      // set the threshold response.data
+      // console.log(response.data);
+      setThreshold(response.data?.threshold);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleThresholdUpdate = async () => {
+    try {
+      // from ppetitions get all the signatures seperately and if hte length of the array is equal to the threshold then the status is closed else open
+      if (threshold <= 0) {
+        toast.warn("Threshold cannot be negative or zero!");
+        return;
+      }
+      const response = await axios.put(
+        `${BASE_URL}/petition/set-global-threshold`,
+        {
+          threshold,
+        }
+      );
+      toast.success("Threshold updated successfully!");
+      setThreshold(response.data?.threshold);
+      getGlobalThreshold();
+      getAllPetitions();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div className="mt-3 grid h-full grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-3">
@@ -98,7 +135,7 @@ const Dashboard = ({ isAdmin }) => {
           />
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">
+      {/* <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">
         <Widget
           icon={<MdBarChart className="h-7 w-7" />}
           title={"Earnings"}
@@ -129,7 +166,7 @@ const Dashboard = ({ isAdmin }) => {
           title={"Total Projects"}
           subtitle={"£2433"}
         />
-      </div>
+      </div> */}
 
       {isAdmin && (
         <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 3xl:grid-cols-6">
@@ -150,12 +187,16 @@ const Dashboard = ({ isAdmin }) => {
                 type="number"
                 placeholder="Set the threshold"
                 className="pl-3 block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
+                value={threshold}
+                onChange={handleChange}
+                name="threshold"
               />
             </div>
             <div className=" flex items-center justify-between gap-4 sm:justify-start 2xl:gap-10">
               <button
                 className="text-black linear rounded-xl bg-gray-200 px-4 py-2 text-center text-base font-medium transition duration-200
             hover:bg-gray-300 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white"
+                onClick={handleThresholdUpdate}
               >
                 Update
               </button>
@@ -184,7 +225,13 @@ const Dashboard = ({ isAdmin }) => {
           </button>
         </div>
       )}
-      <Tables isAdmin={isAdmin} petitions={petitions} />
+      <Tables
+        isAdmin={isAdmin}
+        petitions={petitions}
+        userId={userData?.id}
+        getAllPetitions={getAllPetitions}
+        threshold={threshold}
+      />
 
       {!isAdmin && showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import InputField from "../../components/fields/InputField";
 import { BsQrCode } from "react-icons/bs";
 import QrScanner from "qr-scanner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { BASE_URL } from "../../config";
 
 export default function SignUp() {
+  const navigate = useNavigate();
+
   const [scanResultWebCam, setScanResultWebCam] = useState("");
   const [isQrPopupOpen, setIsQrPopupOpen] = useState(false);
   const videoRef = useRef(null);
@@ -89,13 +91,17 @@ export default function SignUp() {
         password: credentials.password,
         role: "petitioner",
       };
-      console.log(body);
       const response = await axios.post(
         `${BASE_URL}/auth/petitioner/register`,
         body
       );
+      toast.success("SignUp successful!");
       console.log(response.data);
-      toast.success("Sign Up successful!");
+      localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("role", "petitioner");
+      localStorage.setItem("userId", response.data.data._id);
+
+      navigate("/petitioner");
     } catch (error) {
       console.error(error);
     }

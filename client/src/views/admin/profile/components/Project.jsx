@@ -5,7 +5,10 @@ import image2 from "../../../../assets/img/profile/image2.png";
 import image3 from "../../../../assets/img/profile/image3.png";
 import Card from "../../../../components/card";
 
-const Project = ({ isAdmin }) => {
+const Project = ({ isAdmin, petitions, userData }) => {
+  const getUserInital = (username) => {
+    return username?.charAt(0)?.toUpperCase();
+  };
   return (
     <Card extra={"w-full p-4 h-full"}>
       <div className="mb-8 w-full">
@@ -14,35 +17,42 @@ const Project = ({ isAdmin }) => {
         </h4>
         <p className="mt-2 text-base text-gray-600">
           {isAdmin
-            ? "All petitions created by users"
-            : "Here you can find all the petitions you have created."}
+            ? "Latest petitions created by users"
+            : "Here you can find your latest created petitions."}
         </p>
       </div>
       {/* Need to map here list of latest or current 5 petitions by all the users and by single user */}
-      <div className="flex w-full items-center justify-between rounded-2xl bg-white p-3 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none">
-        <div className="flex items-center">
-          <div className="">
-            <img className="h-[83px] w-[83px] rounded-lg" src={image1} alt="" />
-          </div>
-          <div className="ml-4">
-            <p className="text-base font-medium text-navy-700 dark:text-white">
-              Technology behind the Blockchain
-            </p>
-            <p className="mt-2 text-sm text-gray-600">
-              Project #1 .
-              <a
-                className="ml-1 font-medium text-brand-500 hover:text-brand-500 dark:text-white"
-                href=" "
+      {petitions?.slice(0, 3)?.map((petition, index) => (
+        <div
+          key={index}
+          className="flex w-full items-center justify-between rounded-2xl bg-white p-3 shadow-3xl shadow-shadow-500 dark:!bg-navy-700 dark:shadow-none mt-3"
+        >
+          <div className="flex items-center">
+            <div className="">
+              {/* <img
+                className="h-[83px] w-[83px] rounded-lg"
+                src={image3}
+                alt=""
+              /> */}
+              <p
+                className="text-3xl font-bold text-navy-700 dark:text-white h-[83px] w-[83px] rounded-lg
+                text-center flex items-center justify-center bg-gray-200  dark:bg-navy-800 dark:text-white
+              "
               >
-                See product details
-              </a>
-            </p>
+                {isAdmin ? "A" : getUserInital(userData.username)}
+              </p>
+            </div>
+            <div className="ml-4">
+              <p className="text-base font-medium text-navy-700 dark:text-white">
+                {petition.title}
+              </p>
+              <p className="mt-2 text-sm text-brand-500">
+                {petition.description}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="mr-4 flex items-center justify-center text-gray-600 dark:text-white">
-          <MdModeEditOutline />
-        </div>
-      </div>
+      ))}
     </Card>
   );
 };
