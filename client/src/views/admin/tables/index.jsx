@@ -3,7 +3,14 @@ import { columnsDataComplex } from "./variables/columnsData";
 import tableDataComplex from "./variables/tableDataComplex.json";
 import ComplexTable from "./components/ComplexTable";
 
-const Tables = ({ isAdmin, petitions, userId, threshold, getAllPetitions }) => {
+const Tables = ({
+  isAdmin,
+  petitions,
+  userId,
+  threshold,
+  getAllPetitions,
+  isProfile,
+}) => {
   // console.log(petitions);
   return (
     <div>
@@ -15,6 +22,7 @@ const Tables = ({ isAdmin, petitions, userId, threshold, getAllPetitions }) => {
           userId={userId}
           threshold={threshold}
           getAllPetitions={getAllPetitions}
+          isProfile={isProfile}
         />
       </div>
     </div>

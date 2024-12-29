@@ -76,6 +76,10 @@ export default function SignIn() {
 
   const handlePetitionerSignIn = async () => {
     try {
+      if (!credentials.email || !credentials.password) {
+        return toast.error("Please fill all the fields!");
+      }
+
       const body = {
         email: credentials.email,
         password: credentials.password,

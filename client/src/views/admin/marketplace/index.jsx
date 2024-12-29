@@ -48,8 +48,9 @@ const Dashboard = ({ isAdmin }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "threshold") {
-      if (value >= 0) {
-        setThreshold(value);
+      const numericValue = parseInt(value, 10); // Ensure the value is converted to a number
+      if (!isNaN(numericValue) && numericValue >= 0) {
+        setThreshold(numericValue);
       }
     } else {
       setState({ ...state, [name]: value });
@@ -95,9 +96,8 @@ const Dashboard = ({ isAdmin }) => {
       const response = await axios.get(
         `${BASE_URL}/petition/get-global-threshold`
       );
-      // set the threshold response.data
-      // console.log(response.data);
-      setThreshold(response.data?.threshold);
+      const globalThreshold = response.data; // Ensure this is a number
+      setThreshold(globalThreshold);
     } catch (error) {
       console.error(error);
     }
@@ -105,23 +105,24 @@ const Dashboard = ({ isAdmin }) => {
 
   const handleThresholdUpdate = async () => {
     try {
-      // from ppetitions get all the signatures seperately and if hte length of the array is equal to the threshold then the status is closed else open
       if (threshold <= 0) {
         toast.warn("Threshold cannot be negative or zero!");
         return;
       }
+
       const response = await axios.put(
         `${BASE_URL}/petition/set-global-threshold`,
-        {
-          threshold,
-        }
+        { threshold }
       );
-      toast.success("Threshold updated successfully!");
-      setThreshold(response.data?.threshold);
-      getGlobalThreshold();
-      getAllPetitions();
+
+      if (response.status === 200) {
+        toast.success("Threshold updated successfully!");
+        getAllPetitions();
+        getGlobalThreshold();
+      }
     } catch (error) {
       console.error(error);
+      toast.error("Error updating the threshold. Please try again!");
     }
   };
 

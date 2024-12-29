@@ -34,23 +34,62 @@ passport.deserializeUser((id, done) => {
 
 // ROUTE 1: CREATE A PETITION
 
+// router.post("/create", verifyToken, async (req, res) => {
+//   try {
+//     const { title, description } = req.body;
+//     const userId = req.user.id;
+
+//     const user = await User.findById(userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     const newPetition = new Petition({
+//       title,
+//       description,
+//       createdBy: userId,
+//       username: user.username,
+//       // set threshold to current number threshold from th e petition model
+//     });
+
+//     await newPetition.save();
+//     res.status(201).json({
+//       message: "Petition created successfully",
+//       petition: newPetition,
+//       user: {
+//         id: user._id,
+//         username: user.username,
+//         email: user.email,
+//         role: user.role,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Error creating petition", error });
+//   }
+// });
+// ROUTE 1: CREATE A PETITION
 router.post("/create", verifyToken, async (req, res) => {
   try {
     const { title, description } = req.body;
     const userId = req.user.id;
-    console.log(userId);
 
     const user = await User.findById(userId);
-    console.log(user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Fetch the threshold value from the most recent petition (you can change the logic to fetch the threshold as needed)
+    const lastPetition = await Petition.findOne().sort({ createdAt: -1 });
+    const threshold = lastPetition ? lastPetition.threshold : 0; // Default threshold if no petition exists
+
     const newPetition = new Petition({
       title,
       description,
       createdBy: userId,
+      username: user.username,
+      threshold, // Set the threshold to the last petition's threshold or default to 10
     });
 
     await newPetition.save();
@@ -117,14 +156,15 @@ router.put("/set-global-threshold", async (req, res) => {
       return res.status(400).json({ message: "Invalid threshold value" });
     }
 
-    const petitions = await Petition.find();
+    // Fetch only petitions with status "open"
+    const petitions = await Petition.find({ status: "open" });
+
     const updatePromises = petitions.map((petition) => {
       petition.threshold = threshold;
 
-      if (petition.signatures.length === threshold) {
+      // Check if the number of signatures equals the new threshold
+      if (petition.signatures.length >= threshold) {
         petition.status = "closed";
-      } else if (petition.signatures.length < threshold) {
-        petition.status = "open";
       }
 
       return petition.save();
@@ -133,7 +173,7 @@ router.put("/set-global-threshold", async (req, res) => {
     const results = await Promise.all(updatePromises);
 
     res.status(200).json({
-      message: "Global threshold set successfully for all petitions",
+      message: "Global threshold set successfully for open petitions",
       updatedPetitions: results,
     });
   } catch (error) {
@@ -145,7 +185,7 @@ router.put("/set-global-threshold", async (req, res) => {
 router.get("/get-global-threshold", async (req, res) => {
   try {
     const threshold = await Petition.find().select("threshold");
-    res.json(threshold[0]);
+    res.json(threshold);
   } catch (error) {
     res.status(500).json({ message: "Error getting global threshold", error });
   }
@@ -179,9 +219,9 @@ router.put("/update/:id", verifyToken, async (req, res) => {
       petition.signatures = signatures;
     }
 
-    if (petition.signatures.length === petition.threshold) {
-      petition.status = "closed";
-    }
+    // if (petition.signatures.length === petition.threshold) {
+    //   petition.status = "closed";
+    // }
 
     await petition.save();
     res.json(petition);
@@ -190,65 +230,28 @@ router.put("/update/:id", verifyToken, async (req, res) => {
   }
 });
 
-// router.put("/update/:id", verifyToken, async (req, res) => {
-//   try {
-//     const { threshold, status, signatures } = req.body;
+// ROUTE 6: UPDATE RESPONSE FOR A PETITION BY PETITION ID - here only admin can update the response
+router.put("/update-response/:id", verifyToken, async (req, res) => {
+  try {
+    // take response and status from the body
+    const { response, status } = req.body;
 
-//     // Fetch the petition
-//     const petition = await Petition.findById(req.params.id);
-//     if (!petition) {
-//       return res.status(404).json({ message: "Petition not found" });
-//     }
-
-//     // If the petition is closed, restrict further updates except status-related
-//     if (petition.status === "closed") {
-//       return res.status(400).json({ message: "Petition is already closed" });
-//     }
-
-//     let isUpdated = false;
-
-//     // Update threshold if provided
-//     if (threshold !== undefined) {
-//       if (typeof threshold !== "number" || threshold <= 0) {
-//         return res.status(400).json({ message: "Invalid threshold value" });
-//       }
-//       petition.threshold = threshold;
-//       isUpdated = true;
-//     }
-
-//     // Update status if provided
-//     if (status !== undefined) {
-//       if (!["open", "closed"].includes(status)) {
-//         return res.status(400).json({ message: "Invalid status value" });
-//       }
-//       petition.status = status;
-//       isUpdated = true;
-//     }
-
-//     // Update signatures if provided
-//     if (signatures !== undefined) {
-//       if (!Array.isArray(signatures)) {
-//         return res.status(400).json({ message: "Signatures must be an array" });
-//       }
-//       petition.signatures = signatures;
-//       isUpdated = true;
-//     }
-
-//     // Automatically close petition if signatures match threshold
-//     if (petition.signatures.length >= petition.threshold) {
-//       petition.status = "closed";
-//       isUpdated = true;
-//     }
-
-//     // Save only if there are updates
-//     if (isUpdated) {
-//       await petition.save();
-//     }
-
-//     res.json(petition);
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating petition", error });
-//   }
-// });
+    const petition = await Petition.findById(req.params.id);
+    if (!petition) {
+      return res.status(404).json({ message: "Petition not found" });
+    }
+    // if petition threshold is equal to the number of signatures, the status should be updated to closed
+    if (petition.signatures.length === petition.threshold) {
+      petition.status = "closed";
+    }
+    // update the response and status
+    petition.response = response;
+    petition.status = status;
+    await petition.save();
+    res.json(petition);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating response", error });
+  }
+});
 
 module.exports = router;

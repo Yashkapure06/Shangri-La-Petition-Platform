@@ -15,6 +15,10 @@ const petitionSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  username: {
+    type: String,
+    required: true,
+  },
   signatures: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,11 +32,15 @@ const petitionSchema = new mongoose.Schema({
   },
   threshold: {
     type: Number,
-    default: 0,
+    default: 1,
   },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  response: {
+    type: String,
+    default: "",
   },
 });
 

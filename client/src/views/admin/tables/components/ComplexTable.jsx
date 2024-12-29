@@ -12,17 +12,38 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import ResponseCell from "./ResponseCell";
 
 const columnHelper = createColumnHelper();
 
 export default function ComplexTable(props) {
-  const { tableData, isAdmin, userId, threshold, getAllPetitions } = props;
+  const {
+    tableData,
+    isAdmin,
+    userId,
+    threshold = [],
+    getAllPetitions,
+    isProfile,
+  } = props;
   const [sorting, setSorting] = useState([]);
   const [loading, setLoading] = useState(false);
 
   let currentUser = userId;
 
   const columns = [
+    columnHelper.accessor("username", {
+      id: "username",
+      header: () => (
+        <p className="text-sm font-bold text-gray-600 dark:text-white">
+          Created By
+        </p>
+      ),
+      cell: (info) => (
+        <p className="text-sm font-bold text-navy-700 dark:text-white">
+          {info.getValue()}
+        </p>
+      ),
+    }),
     columnHelper.accessor("title", {
       id: "title",
       header: () => (
@@ -43,11 +64,31 @@ export default function ComplexTable(props) {
           Petition Description
         </p>
       ),
-      cell: (info) => (
-        <p className="text-sm font-bold text-navy-700 dark:text-white">
-          {info.getValue()}
-        </p>
-      ),
+      cell: (info) => {
+        const description = info.getValue();
+        const [showFullDescription, setShowFullDescription] = useState(false);
+
+        const truncatedDescription =
+          description.length > 50 && !showFullDescription
+            ? `${description.substring(0, 50)}...`
+            : description;
+        return (
+          <>
+            <p className="text-sm font-bold text-navy-700 dark:text-white">
+              {/* {truncatedDescription} */}
+              {truncatedDescription}
+            </p>
+            {description.length > 50 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="text-blue-500 underline mt-1"
+              >
+                {showFullDescription ? "Read Less" : "Read More"}
+              </button>
+            )}
+          </>
+        );
+      },
     }),
     columnHelper.accessor("signatures", {
       id: "signatures",
@@ -57,14 +98,16 @@ export default function ComplexTable(props) {
         </p>
       ),
       cell: (info) => {
-        const row = info.row.original; // Get the current row data
-        const totalSignatures = row.signatures.length; // Current signatures
-        // const threshold = row.threshold; // Total required signatures
+        const row = info.row.original; // Current row data
+        const totalSignatures = row.signatures.length; // Current signatures count
+        const rowThreshold = Array.isArray(threshold)
+          ? threshold.find((t) => t._id === row._id)?.threshold || 0
+          : 0; // Safely access the threshold
 
         return (
           <div className="flex items-center">
             <p className="ml-2 text-sm text-navy-700 dark:text-white">
-              {totalSignatures}/{threshold}
+              {totalSignatures}/{rowThreshold}
             </p>
           </div>
         );
@@ -139,15 +182,12 @@ export default function ComplexTable(props) {
               </p>
             ),
             cell: (info) => {
-              // TODO: Check if the current user is the creator of the petition
-              const petition = info.row.original; // Get the row data
-              const isCreator = petition.createdBy === currentUser; // Check if the current user created the petition
-              const hasSigned = petition.signatures.includes(currentUser); // Check if the current user has already signed
-
+              const petition = info.row.original;
+              const isCreator = petition.createdBy === currentUser;
+              const hasSigned = petition.signatures.includes(currentUser);
               const cursor = isCreator;
               return (
                 <div className="flex">
-                  {/* Button for signing petitions */}
                   <button
                     className={`flex items-center justify-center text-black linear rounded-xl px-4 py-2 text-center text-base font-medium transition duration-200 ${
                       isCreator
@@ -156,8 +196,6 @@ export default function ComplexTable(props) {
                     }`}
                     onClick={() => {
                       if (!isCreator && !hasSigned) {
-                        // Sign the petition if not signed and not the creator
-                        // TODO: Implement the sign petition functionality with the petition ID with update API
                         signPetition(petition._id, petition.signatures);
                       }
 
@@ -165,10 +203,6 @@ export default function ComplexTable(props) {
                         toast.warn("You have already signed this petition.");
                       }
                     }}
-                    // disabled={isCreator }
-                    // style={{
-                    //   cursor: cursor ? "not-allowed" : "pointer",
-                    // }}
                     disabled={cursor}
                   >
                     {hasSigned ? "Signed" : "Sign"}
@@ -176,6 +210,42 @@ export default function ComplexTable(props) {
                       <MdCheckCircle className="text-lg ml-2 text-green-500" />
                     )}
                   </button>
+                </div>
+              );
+            },
+          }),
+        ]
+      : []),
+    ...(isAdmin
+      ? [
+          columnHelper.accessor("response", {
+            id: "response",
+            header: () => (
+              <p className="text-sm font-bold text-gray-600 dark:text-white">
+                Response
+              </p>
+            ),
+            cell: (info) => (
+              <ResponseCell row={info.row} getAllPetitions={getAllPetitions} />
+            ),
+          }),
+        ]
+      : []),
+    ...(!isAdmin
+      ? [
+          columnHelper.accessor("response", {
+            id: "response",
+            header: () => (
+              <p className="text-sm font-bold text-gray-600 dark:text-white">
+                Response
+              </p>
+            ),
+            cell: (info) => {
+              return (
+                <div className="flex">
+                  <p className="text-sm font-bold text-navy-700 dark:text-white">
+                    {info.getValue() || "No response yet"}
+                  </p>
                 </div>
               );
             },
@@ -194,7 +264,7 @@ export default function ComplexTable(props) {
         `${BASE_URL}/petition/update/${petitionId}`,
         {
           signatures: updatedSignatures,
-          status: updatedSignatures.length === threshold ? "closed" : "open",
+          // status: updatedSignatures.length === threshold ? "closed" : "open",
         },
         {
           headers: {
@@ -205,31 +275,16 @@ export default function ComplexTable(props) {
 
       if (response.status === 200) {
         toast.success("Petition signed successfully!");
-        // update the status of the petition to closed if the threshold is reached
-        // if (updatedSignatures.length === threshold) {
-        //   await axios.put(
-        //     `${BASE_URL}/petition/update/${petitionId}`,
-        //     {
-        //       status: "closed",
-        //     },
-        //     {
-        //       headers: {
-        //         Authorization: `Bearer ${token}`, // Adjust for your auth mechanism
-        //       },
-        //     }
-        //   );
-        // }
+
         getAllPetitions();
-        // window.location.reload(); // Reload the page to reflect changes
       }
     } catch (error) {
       console.error("Error signing petition:", error);
-      toast.error("Failed to sign the petition. Please try again.");
+      toast.error("Petition is already signed and closed.");
     } finally {
       setLoading(false);
     }
   };
-  // useeffect to call the getallpetitions function as soon as someone signs a petition
   useEffect(() => {
     getAllPetitions();
   }, [loading]);
@@ -253,7 +308,7 @@ export default function ComplexTable(props) {
           All Petitions
         </div>
       </div>
-      <div className="mt-8 overflow-x-scroll xl:overflow-x-hidden">
+      <div className="mt-8 overflow-x-scroll">
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (

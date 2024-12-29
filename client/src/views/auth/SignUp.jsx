@@ -83,6 +83,16 @@ export default function SignUp() {
 
   const handlePetitionerSignUp = async () => {
     try {
+      if (
+        !credentials.username ||
+        !credentials.email ||
+        !credentials.dateOfBirth ||
+        !credentials.bioId ||
+        !credentials.password
+      ) {
+        return toast.error("Please fill all the fields!");
+      }
+
       const body = {
         username: credentials.username,
         email: credentials.email,
