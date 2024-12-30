@@ -90,6 +90,14 @@ const Profile = ({ isAdmin }) => {
             <table className="w-full">
               <thead>
                 <tr className="!border-px !border-gray-400">
+                  {isAdmin && (
+                    <th
+                      scope="col"
+                      className="cursor-pointer border-b-[1px] border-gray-200 pt-4 pb-2 pr-4 text-start"
+                    >
+                      Created By
+                    </th>
+                  )}
                   <th
                     scope="col"
                     className="cursor-pointer border-b-[1px] border-gray-200 pt-4 pb-2 pr-4 text-start"

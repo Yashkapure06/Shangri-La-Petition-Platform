@@ -57,7 +57,7 @@ const Banner = ({ isAdmin, userData, petitions }) => {
               {getSignatureCount()}
             </p>
             <p className="text-sm font-normal text-gray-600">
-              Petitions You have Signed
+              Your Signed Petitions{" "}
             </p>
           </div>
         </div>

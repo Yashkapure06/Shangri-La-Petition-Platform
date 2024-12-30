@@ -26,7 +26,7 @@ function InputField(props) {
       const phoneRegex = /^[0-9]+$/;
       if (!phoneRegex.test(value)) error = "Only numbers are allowed.";
     } else if (type === "text" && id === "username") {
-      const usernameRegex = /^[A-Za-z]+$/;
+      const usernameRegex = /^[A-Z a-z]+$/;
       if (!usernameRegex.test(value)) error = "Only alphabets are allowed.";
     } else if (type === "date") {
       const selectedDate = new Date(value);
