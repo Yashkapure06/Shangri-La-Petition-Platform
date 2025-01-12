@@ -31,14 +31,14 @@ function InputField(props) {
     } else if (type === "date") {
       const selectedDate = new Date(value);
       const today = new Date();
-      const age = today.getFullYear() - selectedDate.getFullYear();
-      const monthDiff = today.getMonth() - selectedDate.getMonth();
-      const dayDiff = today.getDate() - selectedDate.getDate();
-
-      // Adjust for the month/day difference
-      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-        age--;
-      }
+      const age =
+        today.getFullYear() -
+        selectedDate.getFullYear() -
+        (today.getMonth() < selectedDate.getMonth() ||
+        (today.getMonth() === selectedDate.getMonth() &&
+          today.getDate() < selectedDate.getDate())
+          ? 1
+          : 0);
 
       if (selectedDate > today) {
         error = "Date cannot be in the future.";
