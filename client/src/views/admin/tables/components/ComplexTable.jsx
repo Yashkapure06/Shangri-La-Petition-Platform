@@ -27,7 +27,6 @@ export default function ComplexTable(props) {
   } = props;
   const [sorting, setSorting] = useState([]);
   const [loading, setLoading] = useState(false);
-
   let currentUser = userId;
 
   const columns = [
@@ -100,9 +99,10 @@ export default function ComplexTable(props) {
       cell: (info) => {
         const row = info.row.original; // Current row data
         const totalSignatures = row.signatures.length; // Current signatures count
+
         const rowThreshold = Array.isArray(threshold)
-          ? threshold.find((t) => t._id === row._id)?.threshold || 0
-          : 0; // Safely access the threshold
+          ? threshold.find((t) => t._id === row._id)?.threshold ?? 0
+          : 0;
 
         return (
           <div className="flex items-center">
@@ -264,7 +264,6 @@ export default function ComplexTable(props) {
         `${BASE_URL}/petition/update/${petitionId}`,
         {
           signatures: updatedSignatures,
-          // status: updatedSignatures.length === threshold ? "closed" : "open",
         },
         {
           headers: {
@@ -285,10 +284,6 @@ export default function ComplexTable(props) {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    getAllPetitions();
-  }, [loading]);
-
   const table = useReactTable({
     data: tableData,
     columns,

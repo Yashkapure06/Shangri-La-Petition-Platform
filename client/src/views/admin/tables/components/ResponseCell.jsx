@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { BASE_URL } from "../../../../config";
 
 function ResponseCell({ row, getAllPetitions }) {
-  console.log(row.original.signatures.length === row.original.threshold);
   const [response, setResponse] = useState(row.original.response || "");
   //also update the status of the petition
   const [status, setStatus] = useState(row.original.status || "");
@@ -17,7 +16,6 @@ function ResponseCell({ row, getAllPetitions }) {
         setStatus("closed");
       }
 
-      console.log("status in response cell", status);
       const body = {
         response,
         status:
