@@ -67,7 +67,6 @@ export default function SignUp() {
   const checkIsBioIdExists = async (bioId) => {
     try {
       const response = await axios.get(`${BASE_URL}/check/bioId/${bioId}`);
-      console.log(response.data);
       if (response.data.status === true) {
         toast.error("Bio Id already exists");
         setScanResultWebCam("");
@@ -83,16 +82,6 @@ export default function SignUp() {
 
   const handlePetitionerSignUp = async () => {
     try {
-      // if (
-      //   !credentials.username ||
-      //   !credentials.email ||
-      //   !credentials.dateOfBirth ||
-      //   !credentials.bioId ||
-      //   !credentials.password
-      // ) {
-      //   return toast.error("Please fill all the fields!");
-      // }
-
       const body = {
         username: credentials.username,
         email: credentials.email,
@@ -106,13 +95,13 @@ export default function SignUp() {
         body
       );
       toast.success("SignUp successful!");
-      console.log(response.data);
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("role", "petitioner");
       localStorage.setItem("userId", response.data.data._id);
 
       navigate("/petitioner");
     } catch (error) {
+      toast.error("Sign Up failed!");
       console.error(error);
     }
   };
