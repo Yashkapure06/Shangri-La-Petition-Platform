@@ -54,7 +54,7 @@ const PieChartCard = ({ isAdmin, petitions }) => {
             </p>
           </div>
           <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            {((openCount / (openCount + closedCount)) * 100).toFixed(1)}%
+            {((openCount / (openCount + closedCount)) * 100).toFixed(1) || 0}%
           </p>
         </div>
 
@@ -68,7 +68,7 @@ const PieChartCard = ({ isAdmin, petitions }) => {
             </p>
           </div>
           <p className="mt-px text-xl font-bold text-navy-700 dark:text-white">
-            {((closedCount / (openCount + closedCount)) * 100).toFixed(1)}%
+            {((closedCount / (openCount + closedCount)) * 100).toFixed(1) || 0}%
           </p>
         </div>
       </div>
