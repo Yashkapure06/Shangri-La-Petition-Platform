@@ -25,6 +25,10 @@ const petitionSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  signatureCount: {
+    type: Number,
+    default: 0,
+  },
   status: {
     type: String,
     enum: ["open", "closed"],
@@ -44,6 +48,10 @@ const petitionSchema = new mongoose.Schema({
   },
 });
 
+petitionSchema.pre("save", function (next) {
+  this.signatureCount = this.signatures.length;
+  next();
+});
 const Petition = mongoose.model("Petition", petitionSchema);
 
 module.exports = Petition;
