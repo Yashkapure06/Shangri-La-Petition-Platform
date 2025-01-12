@@ -27,9 +27,7 @@ export default function SignIn() {
 
     if (isQrPopupOpen && videoRef.current) {
       scanner = new QrScanner(videoRef.current, async (result) => {
-        // toast.success(`Scanned successfully: ${result}`);
         setScanResult(result);
-        // TODO: Call an API for logging in using QR code
         await handlePetitionSignInWithQr(result);
 
         setIsQrPopupOpen(false);
@@ -105,7 +103,6 @@ export default function SignIn() {
       const response = await axios.post(`${BASE_URL}/auth/petitioner/login`, {
         bioId,
       });
-      console.log(response.data);
       toast.success("Login successful!");
 
       localStorage.setItem("authToken", response.data.token);
