@@ -1,6 +1,6 @@
 import React, { lazy } from "react";
 
-import Dashboard from "./views/admin/marketplace";
+import Dashboard from "./views/admin/dashboard";
 import Profile from "./views/admin/profile";
 
 // Auth Imports
