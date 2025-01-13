@@ -67,21 +67,50 @@ export default function SignUp() {
   const checkIsBioIdExists = async (bioId) => {
     try {
       const response = await axios.get(`${BASE_URL}/check/bioId/${bioId}`);
-      if (response.data.status === true) {
-        toast.error("Bio Id already exists");
+      const { usage } = response.data;
+
+      if (usage === "not in use") {
+        toast.success("Bio ID is available for use.");
+        setScanResultWebCam(bioId);
+        return true;
+      } else if (usage === "in use") {
+        toast.warn("Bio ID already in use.");
         setScanResultWebCam("");
+        return false;
       } else {
-        toast.success("Bio Id Accepted Successfully");
+        toast.error("Invalid Bio ID.");
+        return false;
       }
-      // return response.data;
     } catch (error) {
-      console.error(error);
+      console.error("Error checking Bio ID:", error);
+      toast.error("An error occurred while checking the Bio ID.");
       return false;
     }
   };
 
   const handlePetitionerSignUp = async () => {
     try {
+      if (!scanResultWebCam) {
+        toast.error(
+          "Please scan a valid Bio ID before signing up! and fill all the fields"
+        );
+        return;
+      }
+
+      try {
+        const markBioIdResponse = await axios.post(`${BASE_URL}/mark/bioId`, {
+          bioId: scanResultWebCam,
+        });
+        toast.success(markBioIdResponse.data.message);
+      } catch (error) {
+        if (error.response && error.response.data.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Failed to mark Bio ID as in use!");
+        }
+        return;
+      }
+
       const body = {
         username: credentials.username,
         email: credentials.email,
@@ -94,6 +123,7 @@ export default function SignUp() {
         `${BASE_URL}/auth/petitioner/register`,
         body
       );
+
       toast.success("SignUp successful!");
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("role", "petitioner");
@@ -110,7 +140,7 @@ export default function SignUp() {
     <div className="mt-16 mb-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center">
       <div className="mt-[1.2vh] w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]">
         <h4 className="mb-2.5 text-4xl font-bold text-navy-700 dark:text-white">
-          Sign Up
+          Petitioner Sign Up
         </h4>
         <p className="mb-9 ml-1 text-base text-gray-600">
           Enter your details to create your account!
