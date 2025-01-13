@@ -1,0 +1,426 @@
+{
+	"info": {
+		"_postman_id": "c0df108e-cc8a-47f2-b459-b254585fb693",
+		"name": "Shangri-la Petition API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17985489"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"admin@petition.parliament.sr\",\r\n    \"password\": \"2025%shangrila\",\r\n    \"role\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/auth/admin/login",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"auth",
+										"admin",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "petitioner",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "register",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"Yash New User\",\r\n    \"email\": \"yashnew@user.com\",\r\n    \"password\": \"123456789\",\r\n    \"bioId\": \"D05HPPQNJ4\",\r\n    \"role\": \"petitioner\",\r\n    \"dob\" : \"06/06/2001\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/auth/petitioner/register",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"auth",
+										"petitioner",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"bioId\": \"7DMPYAZAP2\"\r\n}\r\n// {\r\n//     \"email\": \"yash@gmail.com\",\r\n//     \"password\": \"123456789\"\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/auth/petitioner/login",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"auth",
+										"petitioner",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check bioId exists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/check/bioId/K1YL8VA2HG",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"check",
+										"bioId",
+										"K1YL8VA2HG"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "mark bioId in use",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"bioId\": \"D05HPPQNJ4\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/mark/bioId",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"mark",
+										"bioId"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "petitioner",
+					"item": [
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/getall/petitioners",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"getall",
+										"petitioners"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/get/petitioner/:id",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"get",
+										"petitioner",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "67680ca818c1b0f0ca942d2f"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "petitions",
+					"item": [
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"1st test petition\",\r\n    \"description\": \"this is 1st test description\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/petition/create",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/petition/getall",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"getall"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set threshold",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"threshold\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/petition/set-global-threshold",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"set-global-threshold"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get threshold",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/petition/get-global-threshold",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"get-global-threshold"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sign petition",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/petition/update/:id",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"update",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all petitions by id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{BASE_URL}}/petition/getall/:id",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"getall",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "67680ca818c1b0f0ca942d2f"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update response",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"response\": \"Yooo this is your response\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/petition/update-response/:id",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"petition",
+										"update-response",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "676ecd5546a3fcaa845d9948"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjczNjBiNDcwOWJjOTljOTA1MDQ2ZGQ0In0sImlhdCI6MTczMTg4OTM1N30.pcVYruJWM62ltVa-jkrpjv-7-rbIOFeR2FbcbdHcrSg",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": " http://localhost:8080/api",
+			"type": "string"
+		}
+	]
+}
