@@ -59,6 +59,7 @@
    Run the following command to install all dependencies:
 
    ```bash
+   unzip client.zip
    cd client
    npm install --force (make sure to copy command properly*)
    ```
@@ -106,6 +107,7 @@
    In the backend directory, run the following command:
 
    ```bash
+   unzip server.zip
    cd server
    npm install
    ```
