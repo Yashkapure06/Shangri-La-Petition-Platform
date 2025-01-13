@@ -99,6 +99,9 @@ export default function SignIn() {
   };
 
   const handlePetitionSignInWithQr = async (bioId) => {
+    if (!bioId) {
+      return toast.error("Use Registered QR Code!");
+    }
     try {
       const response = await axios.post(`${BASE_URL}/auth/petitioner/login`, {
         bioId,
@@ -111,7 +114,7 @@ export default function SignIn() {
 
       navigate("/petitioner");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed!");
+      toast.error("Use Registered QR Code!");
       console.error(error);
     }
   };
