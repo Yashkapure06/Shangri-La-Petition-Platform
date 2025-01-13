@@ -128,7 +128,6 @@ router.post(
       newUser.password = await bcrypt.hash(password, salt);
       const token = jwt.sign({ id: newUser._id }, JWT_SECRET);
       await newUser.save();
-      // TODO: repove data from response after testing more or create a payload as per requirement
       return res.status(200).json({
         token,
         data: newUser,
@@ -150,7 +149,6 @@ router.post("/petitioner/login", async (req, res) => {
 
     if (bioId) {
       petitioner = await User.findOne({ bioId });
-      console.log("1.", petitioner);
 
       if (!petitioner) {
         return res.status(400).json({ error: "Invalid BioId" });
@@ -168,11 +166,8 @@ router.post("/petitioner/login", async (req, res) => {
     } else {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
-    console.log("2", petitioner);
-
     const token = jwt.sign({ id: petitioner._id }, JWT_SECRET);
 
-    //TODO: remove petitioner from resopnse after testing more or create a payload as per requirement
     return res
       .status(200)
       .json({ token, petitioner, message: "Login Successful" });

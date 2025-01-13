@@ -5,6 +5,7 @@ const passport = require("passport");
 
 const User = require("../models/User");
 const verifyToken = require("../middleware/verifyToken");
+const BioId = require("../models/BioId");
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -63,15 +64,54 @@ router.get("/get/petitioner/:id", verifyToken, async (req, res) => {
 // ROUTE 3: CHECK IF THE BIO ID EXISTS FOR PETITIONER WHILE SIGNING UP/IN A Global API
 router.get("/check/bioId/:bioId", async (req, res) => {
   try {
-    const bioId = req.params.bioId;
+    const { bioId } = req.params;
+
+    const bio = await BioId.findOne({ bioId });
+    if (!bio) {
+      return res
+        .status(404)
+        .json({ message: "Bio ID not found in database", status: false });
+    }
+
     const petitioner = await User.findOne({ bioId });
     if (petitioner) {
-      res.json({ message: "Bio Id exists", status: true });
-    } else {
-      res.json({ message: "Bio Id does not exist", status: false });
+      return res.json({
+        message: "Bio ID exists and is in use",
+        status: true,
+        usage: "in use",
+      });
     }
+
+    return res.json({
+      message: "Bio ID exists but is not in use",
+      status: true,
+      usage: "not in use",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/mark/bioId", async (req, res) => {
+  try {
+    const { bioId } = req.body;
+
+    const bio = await BioId.findOne({ bioId });
+
+    if (!bio) {
+      return res.status(404).json({ message: "Bio ID not found" });
+    }
+
+    if (bio.status === "in use") {
+      return res.status(400).json({ message: "Bio ID is already in use" });
+    }
+
+    bio.status = "in use";
+    await bio.save();
+
+    return res.json({ message: "Bio ID marked as in use" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 });
 

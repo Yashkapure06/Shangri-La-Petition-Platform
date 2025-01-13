@@ -33,42 +33,6 @@ passport.deserializeUser((id, done) => {
 });
 
 // ROUTE 1: CREATE A PETITION
-
-// router.post("/create", verifyToken, async (req, res) => {
-//   try {
-//     const { title, description } = req.body;
-//     const userId = req.user.id;
-
-//     const user = await User.findById(userId);
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     const newPetition = new Petition({
-//       title,
-//       description,
-//       createdBy: userId,
-//       username: user.username,
-//       // set threshold to current number threshold from th e petition model
-//     });
-
-//     await newPetition.save();
-//     res.status(201).json({
-//       message: "Petition created successfully",
-//       petition: newPetition,
-//       user: {
-//         id: user._id,
-//         username: user.username,
-//         email: user.email,
-//         role: user.role,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error creating petition", error });
-//   }
-// });
-// ROUTE 1: CREATE A PETITION
 router.post("/create", verifyToken, async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -80,7 +44,6 @@ router.post("/create", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch the threshold value from the most recent petition (you can change the logic to fetch the threshold as needed)
     const lastPetition = await Petition.findOne().sort({ createdAt: -1 });
     const threshold = lastPetition ? lastPetition.threshold : 0; // Default threshold if no petition exists
 
@@ -89,7 +52,7 @@ router.post("/create", verifyToken, async (req, res) => {
       description,
       createdBy: userId,
       username: user.username,
-      threshold, // Set the threshold to the last petition's threshold or default to 10
+      threshold,
     });
 
     await newPetition.save();
@@ -129,25 +92,6 @@ router.get("/getall/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ROUTE 3: UPDATE THRESHOLD GLOBALLY -only admin can do this
-// router.put("/set-global-threshold", async (req, res) => {
-//   try {
-//     const { threshold } = req.body;
-
-//     const result = await Petition.updateMany(
-//       {},
-
-//       { $set: { threshold } }
-//     );
-
-//     res.status(200).json({
-//       message: "Global threshold set successfully for all petitions",
-//       result,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating global threshold", error });
-//   }
-// });
 router.put("/set-global-threshold", async (req, res) => {
   try {
     const { threshold } = req.body;
@@ -163,9 +107,9 @@ router.put("/set-global-threshold", async (req, res) => {
       petition.threshold = threshold;
 
       // Check if the number of signatures equals the new threshold
-      if (petition.signatures.length >= threshold) {
-        petition.status = "closed";
-      }
+      // if (petition.signatures.length >= threshold) {
+      //   petition.status = "closed";
+      // }
 
       return petition.save();
     });
@@ -191,7 +135,6 @@ router.get("/get-global-threshold", async (req, res) => {
   }
 });
 
-// TODO: ROUTE 5: Update a petition by updating the threshold, status, or signatures
 // when threshold matches the number of signatures, the status should be updated to closed automatically and immediately
 // as soon as a petition is closed, no more signatures can be added
 router.put("/update/:id", verifyToken, async (req, res) => {
